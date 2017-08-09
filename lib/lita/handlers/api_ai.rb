@@ -3,6 +3,7 @@ module Lita
     class ApiAi < Handler
       on :unhandled_message, :chat
       config :api_key, type: String
+      config :match_routes, type: [true, false], default: false
 
       def self.api_key
         Lita.config.handlers.api_ai.api_key
@@ -30,7 +31,18 @@ module Lita
         message = extract_aliases(message)
         response = self.class.aibot.text_request message.body
         reply = response[:result][:fulfillment][:speech]
+        match_against_routes(reply, message) || reply
+      end
 
+      def match_against_routes(reply, message)
+        return false unless config.match_routes
+        out = Lita::Message.new(robot, reply, message.source)
+        out.command!
+        matched = robot.handlers.map do |handler|
+          next unless handler.respond_to?(:dispatch)
+          handler.dispatch(robot, out)
+        end.any?
+        false unless matched
       end
 
       def extract_aliases(message)

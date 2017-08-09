@@ -17,6 +17,9 @@ Add in the API key you generate at api.ai into your config.
 
 config.handlers.api_ai.api_key = "XXXXXXXXXXXXXXXXXXXXXXXXX"
 
+In case you want to have lita check the returned output against routes of other plugins, you can enable it with:
+
+config.handlers.api_ai.match_routes = true
 
 ## Usage
 
